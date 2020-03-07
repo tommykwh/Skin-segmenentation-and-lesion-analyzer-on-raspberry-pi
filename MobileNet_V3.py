@@ -1,10 +1,9 @@
 import tensorflow as tf
 
-from keras import backend as K
-from keras.models import Model
-
-from keras.layers import Conv2D, BatchNormalization, ReLU, DepthwiseConv2D, Activation, Input, Add
-from keras.layers import GlobalAveragePooling2D, Reshape, Dense, multiply, Softmax, Flatten
+# from keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization, ReLU, DepthwiseConv2D, Activation, Add
+from tensorflow.keras.layers import GlobalAveragePooling2D, Reshape, Dense, multiply, Softmax, Flatten
 
 # ** to update custom Activate functions
 from keras.utils.generic_utils import get_custom_objects
@@ -48,7 +47,7 @@ def __global_depthwise_block(_inputs):
     return x
 
 def __se_block(_inputs, ratio=4, pooling_type='avg'):
-    filters = _inputs._keras_shape[-1]
+    filters = _inputs.shape[-1]
     se_shape = (1, 1, filters)
     if pooling_type == 'avg':
         se = GlobalAveragePooling2D()(_inputs)
@@ -77,7 +76,7 @@ def __bottleneck_block(_inputs, out_dim, kernel, strides, expansion_dim, is_use_
         x = BatchNormalization()(x)
 
         if shortcut and strides == (1, 1):
-            in_dim = K.int_shape(_inputs)[-1]
+            in_dim = tf.keras.backend.int_shape(_inputs)[-1]
             if in_dim != out_dim:
                 ins = Conv2D(out_dim, (1, 1), strides=(1, 1), padding='same')(_inputs)
                 x = Add()([x, ins])
@@ -87,7 +86,7 @@ def __bottleneck_block(_inputs, out_dim, kernel, strides, expansion_dim, is_use_
 
 def build_mobilenet_v3(input_size=224, num_classes=1000, model_type='large', pooling_type='avg', include_top=True):
     # ** input layer
-    inputs = Input(shape=(input_size, input_size, 3))
+    inputs = tf.keras.Input(shape=(input_size, input_size, 3))
 
     # ** feature extraction layers
     net = __conv2d_block(inputs, 16, kernel=(3, 3), strides=(2, 2), is_use_bias=False, padding='same', activation='HS') 
@@ -113,7 +112,7 @@ def build_mobilenet_v3(input_size=224, num_classes=1000, model_type='large', poo
         raise NotImplementedError
 
     # ** shape=(None, channel) --> shape(1, 1, channel) 
-    pooled_shape = (1, 1, net._keras_shape[-1])
+    pooled_shape = (1, 1, net.shape[-1])
 
     net = Reshape(pooled_shape)(net)
     net = Conv2D(1280, (1, 1), strides=(1, 1), padding='valid', use_bias=True)(net)

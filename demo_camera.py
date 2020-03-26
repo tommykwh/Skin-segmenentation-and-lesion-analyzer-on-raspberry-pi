@@ -91,8 +91,8 @@ for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=
             cv2.rectangle(frame, (IM_WIDTH // 2 - BOX_WIDTH, IM_HEIGHT // 2 - BOX_HEIGHT), (IM_WIDTH // 2 + BOX_WIDTH, IM_HEIGHT // 2 + BOX_HEIGHT), (0, 0, 255), 4)
             
     key_event = cv2.waitKey(1)
-    #if key_event == ord('k'):
-    if button.is_pressed:
+    if key_event == ord('k'):
+    #if button.is_pressed:
         infer_timestamp = time.time()
         
         cropped_frame = input_frame[IM_HEIGHT // 2 - BOX_WIDTH : IM_HEIGHT // 2 + BOX_HEIGHT, IM_WIDTH // 2 - BOX_WIDTH : IM_WIDTH // 2 + BOX_HEIGHT]

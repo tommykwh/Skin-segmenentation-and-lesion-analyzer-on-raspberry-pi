@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Convolution2D, MaxPooling2D, UpSampling2D, Concatenate
+from tensorflow.keras.layers import Input, Convolution2D, MaxPooling2D, UpSampling2D, Concatenate, Dense
 import os
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -66,7 +67,7 @@ def get_unet():
     return model
 
 def preprocess_unet(imgs):
-    gray_image = cv2.cvtColor(raw_img, cv2.COLOR_BGR2GRAY)
+    gray_image = cv2.cvtColor(imgs, cv2.COLOR_BGR2GRAY)
     imgs_p = np.ndarray((imgs.shape[0], img_rows, img_cols, 1), dtype=np.uint8)
     resized_image = cv2.resize(gray_image, (img_cols, img_rows), interpolation=cv2.INTER_CUBIC)
     imgs_p = resized_image.reshape(resized_image.shape + (1,))
@@ -93,10 +94,10 @@ model.load_weights(filepath)
 
 
 # Set up camera constants
-IM_WIDTH = 1280
-IM_HEIGHT = 720
-BOX_WIDTH = 360
-BOX_HEIGHT = 360
+IM_WIDTH = 600
+IM_HEIGHT = 400
+BOX_WIDTH = 180
+BOX_HEIGHT = 180
 
 # Initialize frame rate calculation
 frame_rate_calc = 1
@@ -158,30 +159,31 @@ for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=
             cv2.rectangle(frame, (IM_WIDTH // 2 - BOX_WIDTH, IM_HEIGHT // 2 - BOX_HEIGHT), (IM_WIDTH // 2 + BOX_WIDTH, IM_HEIGHT // 2 + BOX_HEIGHT), (0, 0, 255), 4)
             
     key_event = cv2.waitKey(1)
-    #if key_event == ord('k'):
-    if button.is_pressed:
+    if key_event == ord('k'):
+    #if button.is_pressed:
         infer_timestamp = time.time()
         
         cropped_frame = input_frame[IM_HEIGHT // 2 - BOX_WIDTH : IM_HEIGHT // 2 + BOX_HEIGHT, IM_WIDTH // 2 - BOX_WIDTH : IM_WIDTH // 2 + BOX_HEIGHT]
-        result = model.predict(np.array([keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(cropped_frame, (224, 224))))]))[0]
+        result = model.predict(np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(cropped_frame, (224, 224))))]))[0]
         print(np.argmax(result), result)
 
-        seg_results = seg_model.predict(preprocess_unet(cropped_frame))[0]
+        seg_results = seg_model.predict(np.array([preprocess_unet(cropped_frame)]))[0]
         
         if np.max(result) > 0.4:
             for i, idx in enumerate(np.argsort(result)[:3:-1]):
                 print(idx)
                 print(label_list[idx])
 
-                mask = cv2.inRange(cv2.cvtColor(prediction[0], cv2.COLOR_GRAY2RGB),
+                mask = cv2.inRange(cv2.cvtColor(seg_results, cv2.COLOR_GRAY2RGB),
                                    (0.9, 0.9, 0.9),
                                    (1, 1, 1))
                 # Create a blank 300x300 black image
                 red = np.zeros((192, 240, 3), np.uint8)
                 # Fill image with red color(set each pixel to red)
                 red[:] = (0, 30, 0)
+        
                 cropped_frame = cv2.resize(cropped_frame, (img_cols, img_rows)) + cv2.bitwise_and(red, red, mask=mask)
-                cv2.putText(cropped_frame, label_list[idx] + ' ' +  str(int(result[idx]*100)) + '%', (30, 50+i*20), font, 0.7, (255,255,255), 2, cv2.LINE_AA)
+                cv2.putText(cropped_frame, label_list[idx] + ' ' +  str(int(result[idx]*100)) + '%', (10, 50+i*20), font, 0.5, (255,255,255), 1, cv2.LINE_AA)
                 cv2.imwrite('cropped_photo.jpg', cropped_frame)
             
             prediction_success_flag = True

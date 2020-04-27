@@ -22,7 +22,7 @@ predictions = Dense(7, activation='softmax')(x)
 model = Model(inputs=mobilenet.input, outputs=predictions)
 filepath = "model.h5"
 model.load_weights(filepath)
-button = Button(17)
+# button = Button(17)
 
 # Set up camera constants
 IM_WIDTH = 1280

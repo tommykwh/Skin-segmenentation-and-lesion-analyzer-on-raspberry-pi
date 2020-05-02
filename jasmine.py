@@ -33,6 +33,7 @@ JASMINE_COL = (187,188,58)
 
 windowName = "JASMINE"
 camera = PiCamera()
+camera.rotation = 90
 camera.resolution = (IM_WIDTH,IM_HEIGHT)
 camera.awb_mode = 'flash'
 camera.framerate = 10
@@ -168,10 +169,16 @@ def take_capture(frame):
             red = np.zeros((192, 240, 3), np.uint8)
                 # Fill image with red color(set each pixel to red)
             red[:] = (0, 30, 0)
-        
+            
+            count = 0
+            for i in range(len(mask)):
+                for j in range(len(mask[i])):
+                    if mask[i][j]:
+                        count += 1
+            
             cropped_frame = cv2.resize(cropped_frame, (img_cols, img_rows)) + cv2.bitwise_and(red, red, mask=mask)
             analysis.append(label_list[idx]+': '+str(int(result[idx]*100))+'%')
-            
+        analysis.append("Approximate Size: "+str("{:.2f}".format(0.000625 * count))+"mm^2") 
     tap_screen = 0
 
 def show_result(frame,img,analysis):

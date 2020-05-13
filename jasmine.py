@@ -51,6 +51,12 @@ label_list = ["pigmented bowen's", 'basal cell carcinoma', 'pigmented benign ker
 success_flag = False
 analysis = []
 cropped_frame = []
+px1=0
+px2=0
+py1=0
+py2=0
+send_pic = False
+
 
 def get_unet():
     concat_axis = 3
@@ -115,12 +121,12 @@ def preprocess_unet(imgs):
     return imgs_p
 
 
-filepath = 'unet.hdf5'
+filepath = './assets/unet.hdf5'
 seg_model = get_unet()
 seg_model.load_weights(filepath)
 
 
-filepath = 'mobilenetv2_model.h5'
+filepath = './assets/mobilenetv2_model.h5'
 IMG_SHAPE = (224, 224, 3)
 mobilev2 = tf.keras.applications.MobileNetV2(input_shape=IMG_SHAPE, weights='imagenet')
 r = mobilev2.layers[-2].output
@@ -128,12 +134,19 @@ predictions = Dense(7, activation='softmax')(r)
 model = Model(inputs=mobilev2.input, outputs=predictions)
 model.load_weights(filepath)
 
+
+
 def CallBackFunc(event, x, y, flags, param):
     global tap_screen
     global success_flag
+    global send_pic
+    
     if event == cv2.EVENT_LBUTTONDOWN:
         if success_flag:
-            success_flag = False
+            if x < px2 and x > px1 and y < py2 and y > py1:
+                send_pic = True
+            else:
+                success_flag = False
         else:
             tap_screen = 1
    
@@ -154,6 +167,9 @@ def take_capture(frame):
     cropped_frame = []
     input_frame = np.array(frame)
     cropped_frame = input_frame[y: y+BOX_HEIGHT, x: x+ BOX_WIDTH]
+    cv2.imwrite("capture.jpg",cropped_frame)
+    
+    
     result = model.predict(np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(cropped_frame, (224, 224))))]))[0]
     seg_results = seg_model.predict(np.array([preprocess_unet(cropped_frame)]))[0]
     
@@ -175,6 +191,7 @@ def take_capture(frame):
                 for j in range(len(mask[i])):
                     if mask[i][j]:
                         count += 1
+            frame = show_result(frame,cropped_frame,analysis)
             
             cropped_frame = cv2.resize(cropped_frame, (img_cols, img_rows)) + cv2.bitwise_and(red, red, mask=mask)
             analysis.append(label_list[idx]+': '+str(int(result[idx]*100))+'%')
@@ -182,6 +199,10 @@ def take_capture(frame):
     tap_screen = 0
 
 def show_result(frame,img,analysis):
+    global px1
+    global px2
+    global py1
+    global py2
     alpha = 0.6
     overlay = frame.copy()
     output = frame.copy()
@@ -202,12 +223,19 @@ def show_result(frame,img,analysis):
     for i, item in enumerate(analysis):
         cv2.putText(output,item,(p1_x+PIC_SIZE+x_offset*2, p1_y+y_offset+i*50),font,0.5,(255, 255, 255),1,cv2.LINE_AA)
         
-    img = cv2.resize(img, (PIC_SIZE, PIC_SIZE))    
-    output[y_offset:y_offset+img.shape[0], x_offset:x_offset+img.shape[1]] = img
+    img = cv2.resize(img, (PIC_SIZE, PIC_SIZE))
+    px1 = x_offset
+    px2 = x_offset+img.shape[1]
+    
+    py1 = y_offset
+    py2 = y_offset+img.shape[0]
+    
+    output[py1:py2, px1:px2] = img
     return output
     
 def read_cam(windowName):
     #t1 = cv2.getTickCount()
+    global send_pic
     t_cap = 0
     
     rawCapture = PiRGBArray(camera, size=(IM_WIDTH, IM_HEIGHT))
@@ -226,6 +254,8 @@ def read_cam(windowName):
         if success_flag:
             instruction = "Tap on screen to close analysis."
             frame = show_result(frame,cropped_frame,analysis)
+            cv2.imwrite("result.jpg",frame)
+            
         else:
             if time.time() - t_cap < 2:
                 instruction = "Nothing Detected. Please try again."
@@ -234,7 +264,9 @@ def read_cam(windowName):
                 instruction = "Tap on screen to capture."
                 cv2.rectangle(frame,(x,y),(x+BOX_WIDTH, y+BOX_HEIGHT),JASMINE_COL,2)
         
-        
+        if send_pic:
+            os.system("blueman-sendto result.jpg capture.jpg")
+            send_pic = False
             
 
         

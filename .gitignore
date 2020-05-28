@@ -1,10 +1,5 @@
-/base_dir
-/base_dir_v2
 *.h5
-/version_2_models
-/version_1_models
 *.npy
 __pycache__
 *.hdf5
 .ipynb_checkpoints
-assets

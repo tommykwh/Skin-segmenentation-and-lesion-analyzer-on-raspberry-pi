@@ -4,3 +4,4 @@ __pycache__
 *.hdf5
 .ipynb_checkpoints
 /assets
+*.tflite

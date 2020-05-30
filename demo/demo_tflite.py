@@ -6,6 +6,7 @@ from PIL import Image
 import time
 import cv2
 
+
 raw_img = Image.open('../assets/test_image.jpg')
 raw_img = np.array(raw_img)
 img = tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(raw_img, (224, 224))))

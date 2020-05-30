@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Model
@@ -22,16 +21,16 @@ IMG_SHAPE = (224, 224, 3)
 mobilev2 = tf.keras.applications.MobileNetV2(input_shape=IMG_SHAPE, weights='imagenet')
 x = mobilev2.layers[-2].output
 predictions = Dense(7, activation='softmax')(x)
-recg_model = Model(inputs=mobilev2.input, outputs=predictions)
-recg_model.load_weights(filepath)
+model = Model(inputs=mobilev2.input, outputs=predictions)
+model.load_weights(filepath)
 
-result = recg_model.predict(np.array([img]))
+result = model.predict(np.array([img]))
 print(np.shape(result))
 print(result)
 print(np.argmax(result))
 
 
-def unet_model(output_channels):
+def unet_model(recg_model, output_channels):
     # Create the base model from the pre-trained model MobileNet V2
     # mobilev2 = tf.keras.applications.MobileNetV2(input_shape=IMG_SHAPE, weights='imagenet', include_top=False)
     # x = mobilev2.layers[-2].output
@@ -87,7 +86,7 @@ def unet_model(output_channels):
 
 OUTPUT_CHANNELS = 1
 filepath = '../models/tf_unet.hdf5'
-seg_model = unet_model(OUTPUT_CHANNELS)
+seg_model = unet_model(model, OUTPUT_CHANNELS)
 seg_model.load_weights(filepath)
 
 def preprocess(imgs):

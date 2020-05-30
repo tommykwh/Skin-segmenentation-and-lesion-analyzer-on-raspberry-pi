@@ -1,7 +1,7 @@
 *.h5
 *.npy
-__pycache__
 *.hdf5
-.ipynb_checkpoints
-/assets
 *.tflite
+__pycache__
+.ipynb_checkpoints
+.DS_Store

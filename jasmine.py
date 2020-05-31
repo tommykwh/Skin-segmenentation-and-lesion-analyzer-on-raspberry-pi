@@ -9,12 +9,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Convolution2D, MaxPooling2D, UpSampling2D, Concatenate, Dense
+from tensorflow_examples.models.pix2pix import pix2pix
 
 import os
 import matplotlib.pyplot as plt
 from PIL import Image
 import time
-
 
 
 #IM_WIDTH = 1280
@@ -26,10 +26,10 @@ IM_HEIGHT = 320
 BOX_WIDTH = 260
 BOX_HEIGHT = 260
 
-img_rows = 192
-img_cols = 240
-
+IMG_SHAPE = (224, 224, 3)
 JASMINE_COL = (187,188,58)
+
+OUTPUT_CHANNELS = 1
 
 windowName = "JASMINE"
 camera = PiCamera()
@@ -43,8 +43,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 tap_screen = 0
 
-y = (IM_HEIGHT - BOX_HEIGHT)//2
-x = (IM_WIDTH - BOX_WIDTH)//2
+y = (IM_HEIGHT - BOX_HEIGHT) // 2
+x = (IM_WIDTH - BOX_WIDTH) // 2
 INS_HEIGHT = 30
 
 label_list = ["pigmented bowen's", 'basal cell carcinoma', 'pigmented benign keratoses', 'dermatofibroma', 'melanoma', 'nevus', 'vascular']
@@ -58,60 +58,24 @@ py2=0
 send_pic = False
 
 
-def get_unet():
-    concat_axis = 3
-    
-    inputs = Input(shape=[img_rows, img_cols, 1])
-    conv1 = Convolution2D(32, (3, 3), activation='relu', padding='same')(inputs)
-    conv1 = Convolution2D(32, (3, 3), activation='relu', padding='same')(conv1)
-    pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
-
-    conv2 = Convolution2D(64, (3, 3), activation='relu', padding='same')(pool1)
-    conv2 = Convolution2D(64, (3, 3), activation='relu', padding='same')(conv2)
-    pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
-
-    conv3 = Convolution2D(128, (3, 3), activation='relu', padding='same')(pool2)
-    conv3 = Convolution2D(128, (3, 3), activation='relu', padding='same')(conv3)
-    pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
-
-    conv4 = Convolution2D(256, (3, 3), activation='relu', padding='same')(pool3)
-    conv4 = Convolution2D(256, (3, 3), activation='relu', padding='same')(conv4)
-    pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
-
-    conv5 = Convolution2D(512, (3, 3), activation='relu', padding='same')(pool4)
-    conv5 = Convolution2D(512, (3, 3), activation='relu', padding='same')(conv5)
-
-#     up6 = merge([UpSampling2D(size=(2, 2))(conv5), conv4], mode='concat', concat_axis=1)
-    up6 = Concatenate(axis=concat_axis)([UpSampling2D(size=(2, 2))(conv5), conv4])
-    conv6 = Convolution2D(256, (3, 3), activation='relu', padding='same')(up6)
-    conv6 = Convolution2D(256, (3, 3), activation='relu', padding='same')(conv6)
-
-#     up7 = merge([UpSampling2D(size=(2, 2))(conv6), conv3], mode='concat', concat_axis=1)
-    up7 = Concatenate(axis=concat_axis)([UpSampling2D(size=(2, 2))(conv6), conv3])
-    conv7 = Convolution2D(128, (3, 3), activation='relu', padding='same')(up7)
-    conv7 = Convolution2D(128, (3, 3), activation='relu', padding='same')(conv7)
-
-#     up8 = merge([UpSampling2D(size=(2, 2))(conv7), conv2], mode='concat', concat_axis=1)
-    up8 = Concatenate(axis=concat_axis)([UpSampling2D(size=(2, 2))(conv7), conv2])
-    conv8 = Convolution2D(64, (3, 3), activation='relu', padding='same')(up8)
-    conv8 = Convolution2D(64, (3, 3), activation='relu', padding='same')(conv8)
-
-#     up9 = merge([UpSampling2D(size=(2, 2))(conv8), conv1], mode='concat', concat_axis=1)
-    up9 = Concatenate(axis=concat_axis)([UpSampling2D(size=(2, 2))(conv8), conv1])
-    conv9 = Convolution2D(32, (3, 3), activation='relu', padding='same')(up9)
-    conv9 = Convolution2D(32, (3, 3), activation='relu', padding='same')(conv9)
-
-    conv10 = Convolution2D(1, (1, 1), activation='sigmoid')(conv9)
-
-    model = Model(inputs=inputs, outputs=conv10)
-
-    return model
-
 def preprocess_unet(imgs):
-    gray_image = cv2.cvtColor(imgs, cv2.COLOR_BGR2GRAY)
-    imgs_p = np.ndarray((imgs.shape[0], img_rows, img_cols, 1), dtype=np.uint8)
-    resized_image = cv2.resize(gray_image, (img_cols, img_rows), interpolation=cv2.INTER_CUBIC)
-    imgs_p = resized_image.reshape(resized_image.shape + (1,))
+    # gray_image = cv2.cvtColor(imgs, cv2.COLOR_BGR2GRAY)
+    # imgs_p = np.ndarray((imgs.shape[0], img_rows, img_cols, 1), dtype=np.uint8)
+    # resized_image = cv2.resize(gray_image, (img_cols, img_rows), interpolation=cv2.INTER_CUBIC)
+    # imgs_p = resized_image.reshape(resized_image.shape + (1,))
+    # imgs_p = imgs_p.astype('float32')
+    # mean = np.mean(imgs_p)
+    # std = np.std(imgs_p)
+    # imgs_p -= mean
+    # imgs_p /= std
+
+    imgs_p = np.ndarray((imgs.shape[0], IMG_SHAPE[0], IMG_SHAPE[1], IMG_SHAPE[2]), dtype=np.uint8)
+    for i, img in enumerate(imgs):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
+        img = cv2.resize(img, (IMG_SHAPE[0], IMG_SHAPE[1]), interpolation=cv2.INTER_CUBIC)
+        img = np.array(img)
+        imgs_p[i] = img
+
     imgs_p = imgs_p.astype('float32')
     mean = np.mean(imgs_p)
     std = np.std(imgs_p)
@@ -135,6 +99,63 @@ model = Model(inputs=mobilev2.input, outputs=predictions)
 model.load_weights(filepath)
 
 
+def unet_model(recg_model, output_channels):
+    # Create the base model from the pre-trained model MobileNet V2
+    # mobilev2 = tf.keras.applications.MobileNetV2(input_shape=IMG_SHAPE, weights='imagenet', include_top=False)
+    # x = mobilev2.layers[-2].output
+    # predictions = Dense(7, activation='softmax')(x)
+    # base_model = Model(inputs=mobilev2.input, outputs=predictions)
+    # base_model.load_weights(filepath)
+
+    # Use the activations of these layers
+    layer_names = [
+        'block_1_expand_relu',   # 64x64
+        'block_3_expand_relu',   # 32x32
+        'block_6_expand_relu',   # 16x16
+        'block_13_expand_relu',  # 8x8
+        'block_16_project',      # 4x4
+    ]
+    layers = [recg_model.get_layer(name).output for name in layer_names]
+
+    # Create the feature extraction model
+    down_stack = tf.keras.Model(inputs=recg_model.input, outputs=layers)
+    down_stack.trainable = False
+
+    up_stack = [
+        pix2pix.upsample(512, 3),  # 4x4 -> 8x8
+        pix2pix.upsample(256, 3),  # 8x8 -> 16x16
+        pix2pix.upsample(128, 3),  # 16x16 -> 32x32
+        pix2pix.upsample(64, 3),   # 32x32 -> 64x64
+    ]
+
+    inputs = tf.keras.layers.Input(shape=IMG_SHAPE)
+    x = inputs
+
+    # Downsampling through the model
+    skips = down_stack(x)
+    x = skips[-1]
+    skips = reversed(skips[:-1])
+
+    # Upsampling and establishing the skip connections
+    for up, skip in zip(up_stack, skips):
+        x = up(x)
+        concat = tf.keras.layers.Concatenate()
+        x = concat([x, skip])
+
+    # This is the last layer of the model
+    last = tf.keras.layers.Conv2DTranspose(
+        filters=1,
+        kernel_size=3,
+        strides=2,
+        padding='same')  #64x64 -> 128x128
+
+    x = last(x)
+
+    return tf.keras.Model(inputs=inputs, outputs=x)
+
+filepath = '../models/tf_unet.hdf5'
+seg_model = unet_model(model, OUTPUT_CHANNELS)
+seg_model.load_weights(filepath)
 
 def CallBackFunc(event, x, y, flags, param):
     global tap_screen
@@ -171,7 +192,7 @@ def take_capture(frame):
     
     
     result = model.predict(np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(cropped_frame, (224, 224))))]))[0]
-    seg_results = seg_model.predict(np.array([preprocess_unet(cropped_frame)]))[0]
+    seg_results = seg_model.predict(np.array(preprocess_unet([cropped_frame])))[0]
     
     if np.max(result) > 0.5:
         #timestr = time.strftime("%Y%m%d_%H%M%S")
@@ -179,10 +200,10 @@ def take_capture(frame):
         success_flag = True
         for i, idx in enumerate(np.argsort(result)[:3:-1]):
             mask = cv2.inRange(cv2.cvtColor(seg_results, cv2.COLOR_GRAY2RGB),
-                                   (0.9, 0.9, 0.9),
+                                   (0.6, 0.6, 0.6),
                                    (1, 1, 1))
                 # Create a blank 300x300 black image
-            red = np.zeros((192, 240, 3), np.uint8)
+            red = np.zeros((IMG_SHAPE[0], IMG_SHAPE[1], 3), np.uint8)
                 # Fill image with red color(set each pixel to red)
             red[:] = (0, 30, 0)
             
@@ -245,7 +266,6 @@ def read_cam(windowName):
         if key == 27:
             break
         frame = f.array
-        
         
         if tap_screen == 1:
             take_capture(frame)

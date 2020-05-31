@@ -9,12 +9,36 @@ from PIL import Image
 import time
 import cv2
 
-# %matplotlib inline
+def convert_to_tflite(model, filename):
+  # Convert the model.
+  converter = tf.lite.TFLiteConverter.from_keras_model(model)
+  tflite_model = converter.convert()
 
-raw_img = Image.open('../assets/test_image.jpg')
-raw_img = np.array(raw_img)
-img = tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(raw_img, (224, 224))))
-# plt.imshow(img)
+  # Save the TF Lite model.
+  with tf.io.gfile.GFile(filename, 'wb') as f:
+    f.write(tflite_model)
+
+def test_converted_tflite(filename):
+  # convert_to_tflite(model, filename)
+  interpreter = tf.lite.Interpreter(model_path=filename)
+  interpreter.allocate_tensors()
+
+  # Get input and output tensors.
+  input_details = interpreter.get_input_details()
+  print(input_details)
+  output_details = interpreter.get_output_details()
+  print(output_details)
+
+  # Test the TensorFlow Lite model on random input data.
+  input_shape = input_details[0]['shape']
+  input_data = np.array(np.random.random_sample(input_shape), dtype=np.float32)
+  interpreter.set_tensor(input_details[0]['index'], input_data)
+
+  interpreter.invoke()
+
+  # The function `get_tensor()` returns a copy of the tensor data.
+  # Use `tensor()` in order to get a pointer to the tensor.
+  # tflite_results = interpreter.get_tensor(output_details[0]['index'])
 
 filepath = '../models/mobilenetv2_model.h5'
 IMG_SHAPE = (224, 224, 3)
@@ -23,12 +47,10 @@ x = mobilev2.layers[-2].output
 predictions = Dense(7, activation='softmax')(x)
 model = Model(inputs=mobilev2.input, outputs=predictions)
 model.load_weights(filepath)
+filename = 'mobilenet_v2.tflite'
 
-result = model.predict(np.array([img]))
-print(np.shape(result))
-print(result)
-print(np.argmax(result))
-
+convert_to_tflite(model, filename)
+test_converted_tflite(filename)
 
 def unet_model(recg_model, output_channels):
     # Create the base model from the pre-trained model MobileNet V2
@@ -88,38 +110,7 @@ OUTPUT_CHANNELS = 1
 filepath = '../models/tf_unet.hdf5'
 seg_model = unet_model(model, OUTPUT_CHANNELS)
 seg_model.load_weights(filepath)
+filename = 'unet.tflite'
 
-def preprocess(imgs):
-    imgs_p = np.ndarray((imgs.shape[0], IMG_SHAPE[0], IMG_SHAPE[1], IMG_SHAPE[2]), dtype=np.uint8)
-    for i, img in enumerate(imgs):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
-        img = cv2.resize(img, (IMG_SHAPE[0], IMG_SHAPE[1]), interpolation=cv2.INTER_CUBIC)
-        img = np.array(img)
-        imgs_p[i] = img
-
-    imgs_p = imgs_p.astype('float32')
-    mean = np.mean(imgs_p)
-    std = np.std(imgs_p)
-    imgs_p -= mean
-    imgs_p /= std
-
-    return imgs_p
-
-test = preprocess(np.array([raw_img]))
-prediction = seg_model.predict(test)
-
-img = cv2.resize(raw_img, (IMG_SHAPE[0], IMG_SHAPE[1]))
-plt.imshow(img)
-plt.show()
-
-mask = cv2.inRange(cv2.cvtColor(prediction[0], cv2.COLOR_GRAY2RGB),
-                   (0.6, 0.6, 0.6),
-                   (1, 1, 1))
-
-# Create a blank 300x300 black image
-red = np.zeros((IMG_SHAPE[0], IMG_SHAPE[1], 3), np.uint8)
-# Fill image with red color(set each pixel to red)
-red[:] = (0, 30, 0)
-
-plt.imshow(img + cv2.bitwise_and(red, red, mask=mask))
-plt.show()
+convert_to_tflite(seg_model, filename)
+test_converted_tflite(filename)

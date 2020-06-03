@@ -6,6 +6,13 @@ cream:	F2EBD5
 brick:	C27067	light: CC847C
 
 */
+
+#result-up h1{
+ transform:deg(90);
+}
+#result-down h1{
+ transform:deg(90);
+}
 @font-face {
     font-family: Futura;
     src: url('resources/FuturaStd-Book.otf');
@@ -182,6 +189,7 @@ video {
 	width:70%;
 	height:100%;
 	z-index:1;
+	visibility:hidden;
 }
 #box {
 	width: min(56vw,80vh);

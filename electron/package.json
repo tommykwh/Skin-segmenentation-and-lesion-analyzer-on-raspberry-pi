@@ -1,0 +1,21 @@
+{
+  "name": "JASMINE",
+  "version": "1.0.0",
+  "description": "Pre-screening solution for skin anomaly",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "Electron",
+    "Python",
+    "TensorFlow"
+  ],
+  "devDependencies": {
+    "electron": "^9.0.0"
+  },
+  "dependencies": {
+    "pi-camera": "^1.3.0",
+    "python-shell": "^1.0.7"
+  }
+}

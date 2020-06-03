@@ -2,7 +2,9 @@
 *.npy
 *.hdf5
 *.tflite
+*.jpg
 __pycache__
 .ipynb_checkpoints
 .DS_Store
+node_modules
  

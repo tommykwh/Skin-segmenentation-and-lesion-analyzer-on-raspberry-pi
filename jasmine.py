@@ -190,7 +190,6 @@ def take_capture(frame):
     cropped_frame = input_frame[y: y+BOX_HEIGHT, x: x+ BOX_WIDTH]
     cv2.imwrite("capture.jpg",cropped_frame)
     
-    
     result = model.predict(np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(cropped_frame, (224, 224))))]))[0]
     seg_results = seg_model.predict(np.array(preprocess_unet([cropped_frame])))[0]
     
@@ -216,6 +215,7 @@ def take_capture(frame):
             
             cropped_frame = cv2.resize(cropped_frame, (img_cols, img_rows)) + cv2.bitwise_and(red, red, mask=mask)
             analysis.append(label_list[idx]+': '+str(int(result[idx]*100))+'%')
+            
         analysis.append("Approximate Size: "+str("{:.2f}".format(0.000625 * count))+"mm^2") 
     tap_screen = 0
 

@@ -150,6 +150,10 @@ video {
 	position:absolute;
 	right:0;
 	bottom:0;
+	-webkit-transform: scaleX(-1);
+	transform:scaleX(-1);
+	-webkit-transform: scaleY(-1);
+	transform:scaleY(-1);
 }
 
 #main {
@@ -217,6 +221,14 @@ video {
 
 .hide {
 	visibility:hidden;
+}
+
+#pl{
+
+position:fixed;
+top:30vh;
+right:20vw;
+z-index:1;
 }
 
 .resultimg{

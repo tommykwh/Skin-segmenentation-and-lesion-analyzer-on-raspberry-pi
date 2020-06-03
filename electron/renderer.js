@@ -5,10 +5,11 @@
 var video = document.getElementById("cam");
 var box = document.getElementById("box");
 var loader = document.getElementById("loader");
+var pl = document.getElementById("pl");
+var prompt = document.getElementById("prompt");
 //var p = document.getElementById("prompt");
 
-var exec = require('child_process').exec, child;
-
+pl.classList.toggle("hide");
 function postFile(file) {
     let formdata = new FormData();
     formdata.append("image", file);
@@ -48,7 +49,8 @@ if (navigator.mediaDevices.getUserMedia && video) {
         
         //raspistill
         loader.classList.toggle("hide");
-        
+        pl.classList.toggle("hide");
+        prompt.innerHTML = "Analyzing..."
         var draw = document.createElement("canvas");
         draw.width = video.videoWidth;
         draw.height = video.videoHeight;

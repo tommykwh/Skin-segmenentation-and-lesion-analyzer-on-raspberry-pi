@@ -121,8 +121,8 @@ def predict_seg(model, raw_img):
 
 @app.route("/detect", methods=["GET", "POST"])
 def detect():
-    if request.method == "GET":
-        os.system("blueman-sendto static/seg_img.jpg")
+    if request.method == "GET":       
+        os.system("blueman-sendto static/seg_img.jpg prescreen.txt")                                
         return Response('success')
 
     if request.method == "POST":
@@ -150,6 +150,16 @@ def detect():
             jsnn = json.dumps(jsnn)
             jsnn = 'data = ' + jsnn
             f.write(jsnn)
+            
+        with open('prescreen.txt', 'w') as f:
+            f.write(label_to_class[classes[0]])
+            f.write('\n')
+            for i in range(3):
+                f.write(classes[i] + ': ' + accuracies[i])
+                f.write('\n')
+            f.write(size)
+            f.write('\n')
+            f.write(details[label_to_class[classes[0]]][0])
             
         return Response('Success')
         

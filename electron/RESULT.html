@@ -3,25 +3,38 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" href=" {{ url_for('static', filename='style.css') }} ">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5000 ; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self' http://localhost:5000 ; script-src 'self'">
+    <link rel="stylesheet" href="style.css">
     <title>JASMINE</title>
   </head>
   <body>
     <section class="left" id="resultshow">
       <div class="title"><h1>Result</h1></div>
       <div class="resultimg">
-        <img src="resources/Jasmine.png"></img>
+        <img id="rimg" src="resources/Jasmine.png"></img>
       </div>  
-      <div class="steps"><p>shit</p></div>
+      <div id="cate"></div>
+      <div id="rmore">
+        <div id="analysis"></div>
+        <div id="send">Send Result to My Device</div>
+      </div>
     </section>
     <section class="right" id="resultpanel">
       <a href="JASMINE.html">
         <div class="back"><h1>Back</h1></div>
-      </a>  
+      </a> 
+      <a href="#resultshow">
+        <div class="ud" id="result-up"><h1>U</h1></div>
+      </a> 
+      <a href="#rmore">
+        <div class="ud" id="result-down"><h1>D</h1></div>
+        
+      </a> 
     </section>
-
+    <script type="text/javascript" src="result.json"></script>
+    <script type="text/javascript" src="result.js"></script>
+    
   </body>
 </html>
 

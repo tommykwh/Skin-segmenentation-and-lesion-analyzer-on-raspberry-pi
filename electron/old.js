@@ -1,31 +1,3 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
-
-var video = document.getElementById("cam");
-var box = document.getElementById("box");
-var loader = document.getElementById("loader");
-//var p = document.getElementById("prompt");
-
-var exec = require('child_process').exec, child;
-
-function postFile(file) {
-    let formdata = new FormData();
-    formdata.append("image", file);
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:5000/detect', true);
-    xhr.onload = function () {
-        if (this.status === 200) {
-            console.log(this.response);
-            result = localStorage.getItem(this.response);
-            openResult();
-        }
-        else
-            console.error(xhr);
-    };
-    xhr.send(formdata);
-}
-
 
 if (navigator.mediaDevices.getUserMedia && video) {
   navigator.mediaDevices.getUserMedia({ audio: false, video: true }) //{ width: 640, height: 480 }
@@ -45,20 +17,17 @@ if (navigator.mediaDevices.getUserMedia && video) {
       //p.addEventListener('DOMSubtreeModified', openResult);
       
       take.addEventListener("click", function(){
-        
-        //raspistill
         loader.classList.toggle("hide");
-        
         var draw = document.createElement("canvas");
         draw.width = video.videoWidth;
         draw.height = video.videoHeight;
         var context2D = draw.getContext("2d");
         context2D.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        draw.toBlob(postFile, 'image/jpg');
-        //var image = draw.toDataURL("image/png").replace("image/png", "image/octet-stream"); 
+        var image = draw.toDataURL("image/png").replace("image/png", "image/octet-stream"); 
         //window.location.href=image; 
         //link.href = image;
         //link.download = "capture.png";
+        myCamera.snap();
       });
     })
     .catch(function (err0r) {
@@ -67,8 +36,7 @@ if (navigator.mediaDevices.getUserMedia && video) {
 }
 
 
+
 function openResult(){
    window.location.replace("RESULT.html");
 }
-
-

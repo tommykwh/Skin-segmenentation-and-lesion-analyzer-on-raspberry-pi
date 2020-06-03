@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5000 ; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self' http://localhost:5000 ; script-src 'self'">
     <link rel="stylesheet" href="style.css">
     <title>JASMINE</title>
   </head>
@@ -13,11 +13,9 @@
         <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66">
            <circle class="path" fill="none" stroke-width="6" stroke="#41BABA" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
         </svg>
-        <a href="http://127.0.0.1:5000/detect">
-          <svg id="hitbox">
+        <svg id="hitbox">
             <rect id="box" fill="none" stroke-width="3" stroke="#41BABA"></rect>
-          </svg>
-        </a>
+        </svg>
         <div class="v-container">
             <video id="cam" autoplay="true"></video>
             

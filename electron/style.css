@@ -6,6 +6,13 @@ cream:	F2EBD5
 brick:	C27067	light: CC847C
 
 */
+
+#result-up h1{
+ transform:deg(90);
+}
+#result-down h1{
+ transform:deg(90);
+}
 @font-face {
     font-family: Futura;
     src: url('resources/FuturaStd-Book.otf');
@@ -29,6 +36,7 @@ body {
 	background-color: #F2EBD5;
 	margin: 0;
 	overflow: hidden;
+	scroll-behavior: smooth;
 }
 
 .logo{
@@ -85,7 +93,9 @@ h1{
 	margin: 0;
 	float: left;
 	background-color: #F27649;
-	position: relative;
+	position: fixed;
+	top:0;
+	right:0;
 }
 .title {
 	height: 30%;
@@ -119,6 +129,19 @@ h1{
 	height: 30%;
 	justify-content: center;
 }
+.ud:hover {
+	background-color: #F4C373;
+}
+.ud {
+float: left;
+	display: flex;
+    align-items: center; /* Vertical center alignment */
+	margin:0;
+	width: 100%;
+	height: 35%;
+	justify-content: center;
+	background-color: #F2A62A;
+}
 
 .v-container {
 	width: 100%;
@@ -134,22 +157,29 @@ video {
 	position:absolute;
 	right:0;
 	bottom:0;
+	-webkit-transform: scaleX(-1);
+	transform:scaleX(-1);
+	-webkit-transform: scaleY(-1);
+	transform:scaleY(-1);
 }
 
 #main {
 	background-color: #F2A62A;
 }
 
-#save:hover { background-color: #F4C373 }
+#send:hover { background-color: #F4C373 }
 
-#save {
+#send {
 	width: 100%;
-	height: 35%;
-	justify-content: center;
+	height: 30%;
+	padding:2em;
+	margin-top:2em;
+	background-color:#F2A62A;
 	cursor: pointer;
 	display: flex;
     align-items: center;
     justify-content: center;
+    font-size:1.5em;
 }
 
 #hitbox {
@@ -159,6 +189,7 @@ video {
 	width:70%;
 	height:100%;
 	z-index:1;
+	visibility:hidden;
 }
 #box {
 	width: min(56vw,80vh);
@@ -200,8 +231,45 @@ video {
 	visibility:hidden;
 }
 
+#pl{
+
+position:fixed;
+top:30vh;
+right:20vw;
+z-index:1;
+}
+
 .resultimg{
-	width:40%;
+width:39%;
+padding-left:2em;
+padding-top:1em;
+float:left;
+margin:0;
+}
+#cate{
+width:60%;
+float:left;
+margin:0;
+padding:1em;
+padding-top: 1em;;
+color:black;
+font-family: futura;
+height:70vh;
+}
+#cate h2 {
+margin-top: 0;
+margin-bottom:0.5em;
+padding:0;
+font-size:2em;
+}
+#rmore{
+width:100%;
+float:left;
+margin:0;
+padding:2em;
+color:black;
+font-family: futura;
+height:100vh;
 }
 
 #resultshow h1{
@@ -225,7 +293,6 @@ video {
     dash 1.4s ease-in-out infinite, 
     colors 5.6s ease-in-out infinite;
 }
-
 
 @keyframes dash {
  0% { stroke-dashoffset: 187; }

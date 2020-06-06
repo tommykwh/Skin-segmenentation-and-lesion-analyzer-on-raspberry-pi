@@ -32,7 +32,6 @@ def predict(model, img):
     print(np.argmax(result))
 
 predict(model, raw_img)
-predict(model, raw_img)
 
 def preprocess(imgs):
     imgs_p = np.ndarray((imgs.shape[0], IMG_SHAPE[0], IMG_SHAPE[1], IMG_SHAPE[2]), dtype=np.uint8)
@@ -84,7 +83,7 @@ def predict_seg(model, img):
     red = cv2.bitwise_and(red, red, mask=mask)
 
     # plt.imshow(img + cv2.bitwise_and(red, red, mask=mask)
-    alpha = 0.6
+    alpha = 0.8
     img = cv2.addWeighted(img, alpha, red, 1 - alpha, 0)
     # cv2.imwrite('seg_img.jpg', cv2.cvtColor(img, cv2.COLOR_RGB2BGR)) 
     plt.imshow(img)

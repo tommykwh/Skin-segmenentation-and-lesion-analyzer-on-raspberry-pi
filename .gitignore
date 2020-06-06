@@ -3,6 +3,7 @@
 *.hdf5
 *.tflite
 *.jpg
+*.txt
 __pycache__
 .ipynb_checkpoints
 .DS_Store

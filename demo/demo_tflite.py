@@ -22,7 +22,7 @@ def predict(model, img):
     # Get input and output tensors.
     input_details = model.get_input_details()
     output_details = model.get_output_details()
-    img = np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(raw_img, (224, 224))))])
+    img = np.array([tf.keras.applications.mobilenet.preprocess_input(np.array(cv2.resize(img, (224, 224))))])
     model.set_tensor(input_details[0]['index'], img)
     model.invoke()
 
@@ -74,8 +74,8 @@ def predict_seg(model, img):
 
     confidence = 0.6
     mask = cv2.inRange(cv2.cvtColor(prediction[0], cv2.COLOR_GRAY2RGB),
-                    (confidence),
-                    (1))
+                    (confidence, confidence, confidence),
+                    (1, 1, 1))
 
     # Create a blank 300x300 black image
     red = np.zeros((IMG_SHAPE[0], IMG_SHAPE[1], 3), np.uint8)
@@ -86,7 +86,9 @@ def predict_seg(model, img):
     # plt.imshow(img + cv2.bitwise_and(red, red, mask=mask)
     alpha = 0.6
     img = cv2.addWeighted(img, alpha, red, 1 - alpha, 0)
-    cv2.imwrite('seg_img.jpg', cv2.cvtColor(img, cv2.COLOR_RGB2BGR)) 
+    # cv2.imwrite('seg_img.jpg', cv2.cvtColor(img, cv2.COLOR_RGB2BGR)) 
+    plt.imshow(img)
+    plt.show()
        
 
 predict_seg(seg_model, raw_img)

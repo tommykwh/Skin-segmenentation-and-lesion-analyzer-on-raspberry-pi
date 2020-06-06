@@ -12,7 +12,7 @@ IMG_SHAPE = (224, 224, 3)
 OUTPUT_CHANNELS = 1
 label_list = ["pigmented bowen's", 'basal cell carcinoma', 'pigmented benign keratoses', 'dermatofibroma', 'melanoma', 'nevus', 'vascular']
 classification = ['malignant', 'indeterminate', 'benign']
-app = Flask(__name__, template_folder=os.path.abspath("../electron"))
+app = Flask(__name__, template_folder=os.path.abspath("./"))
 filepath = 'static/mobilenet_v2.tflite'
 model = tf.lite.Interpreter(model_path=filepath)
 model.allocate_tensors()
